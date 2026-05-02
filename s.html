@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viktorina</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: linear-gradient(135deg, #667eea, #764ba2); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .quiz-card { background: white; border-radius: 20px; padding: 30px; max-width: 500px; width: 100%; box-shadow: 0 15px 40px rgba(0,0,0,0.2); }
+        .progress-bar { height: 6px; background: #eee; border-radius: 3px; margin-bottom: 20px; overflow: hidden; }
+        .progress { height: 100%; background: #764ba2; width: 0%; transition: width 0.4s; }
+        .question { font-size: 20px; font-weight: bold; color: #333; margin-bottom: 20px; min-height: 60px; }
+        .options { display: flex; flex-direction: column; gap: 12px; }
+        .option { padding: 14px; border: 2px solid #e0e0e0; border-radius: 12px; cursor: pointer; transition: 0.2s; font-size: 16px; background: #fafafa; }
+        .option:hover { background: #f0f0ff; border-color: #764ba2; }
+        .option.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+        .option.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+        .option.disabled { pointer-events: none; opacity: 0.7; }
+        .footer { display: flex; justify-content: space-between; margin-top: 20px; color: #666; font-size: 14px; }
+        .next-btn { padding: 10px 20px; background: #764ba2; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; display: none; }
+        .result { text-align: center; display: none; }
+        .result h2 { font-size: 28px; color: #764ba2; margin-bottom: 10px; }
+        .result p { color: #555; margin-bottom: 20px; }
+        .restart-btn { padding: 12px 25px; background: #28a745; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <div class="quiz-card">
+        <div class="progress-bar"><div class="progress" id="progress"></div></div>
+        <div class="question" id="question"></div>
+        <div class="options" id="options"></div>
+        <div class="footer">
+            <span id="scoreText">Ball: 0</span>
+            <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Keyingisi ➡️</button>
+        </div>
+        <div class="result" id="result">
+            <h2>🎉 Yakunlandi!</h2>
+            <p id="finalScore"></p>
+            <button class="restart-btn" onclick="restartQuiz()">🔄 Qayta Boshlash</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            { q: "O'zbekiston poytaxti qayer?", opts: ["Samarqand", "Toshkent", "Buxoro", "Namangan"], ans: 1 },
+            { q: "HTML qanday til?", opts: ["Dasturlash", "Belgilash", "So'rov", "Ma'lumotlar bazasi"], ans: 1 },
+            { q: "1 bayt necha bitdan iborat?", opts: ["4", "8", "16", "32"], ans: 1 },
+            { q: "Quyosh sistemasida nechta sayyora bor?", opts: ["7", "8", "9", "10"], ans: 1 },
+            { q: "CSS nima uchun ishlatiladi?", opts: ["Mantiq", "Ma'lumot saqlash", "Dizayn", "Tarmoq"], ans: 2 }
+        ];
+
+        let current = 0, score = 0;
+
+        function loadQuestion() {
+            const q = questions[current];
+            document.getElementById('question').textContent = `${current + 1}. ${q.q}`;
+            document.getElementById('progress').style.width = `${(current / questions.length) * 100}%`;
+            document.getElementById('nextBtn').style.display = 'none';
+            
+            const optsContainer = document.getElementById('options');
+            optsContainer.innerHTML = '';
+            
+            q.opts.forEach((opt, i) => {
+                const btn = document.createElement('div');
+                btn.classList.add('option');
+                btn.textContent = opt;
+                btn.onclick = () => checkAnswer(i, btn);
+                optsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected, btn) {
+            const correct = questions[current].ans;
+            const opts = document.querySelectorAll('.option');
+            
+            opts.forEach(o => o.classList.add('disabled'));
+            
+            if (selected === correct) {
+                btn.classList.add('correct');
+                score++;
+                document.getElementById('scoreText').textContent = `Ball: ${score}`;
+            } else {
+                btn.classList.add('wrong');
+                opts[correct].classList.add('correct');
+            }
+            
+            document.getElementById('nextBtn').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            current++;
+            if (current < questions.length) {
+                loadQuestion();
+            } else {
+                document.getElementById('question').style.display = 'none';
+                document.getElementById('options').style.display = 'none';
+                document.getElementById('nextBtn').style.display = 'none';
+                document.querySelector('.progress-bar').style.display = 'none';
+                document.querySelector('.footer').style.display = 'none';
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('finalScore').textContent = `Siz ${questions.length} savoldan ${score} tasiga to'g'ri javob berdingiz!`;
+            }
+        }
+
+        function restartQuiz() {
+            current = 0; score = 0;
+            document.getElementById('scoreText').textContent = 'Ball: 0';
+            document.getElementById('question').style.display = 'block';
+            document.getElementById('options').style.display = 'flex';
+            document.querySelector('.progress-bar').style.display = 'block';
+            document.querySelector('.footer').style.display = 'flex';
+            document.getElementById('result').style.display = 'none';
+            loadQuestion();
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
